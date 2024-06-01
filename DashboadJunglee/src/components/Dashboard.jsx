@@ -76,7 +76,7 @@ const Dashboard = () => {
 
     setChartData({
       line: {
-        labels: timestamps.slice(0, Math.ceil(timestamps.length / 2)), // Shorten the timestamps
+        labels: timestamps.slice(0, Math.ceil(timestamps.length / 20)), // Shorten the timestamps
         datasets: [
           {
             label: "Flow ID Over Time",
@@ -87,7 +87,7 @@ const Dashboard = () => {
         ],
       },
       bar: {
-        labels: timestamps.slice(0, Math.ceil(timestamps.length / 2)), // Shorten the timestamps
+        labels: timestamps.slice(0, Math.ceil(timestamps.length / 20)), // Shorten the timestamps
         datasets: [
           {
             label: "Source Port Distribution",
@@ -111,7 +111,7 @@ const Dashboard = () => {
         ],
       },
       alertBar: {
-        labels: timestamps.slice(0, Math.ceil(timestamps.length / 2)), // Shorten the timestamps
+        labels: timestamps.slice(0, Math.ceil(timestamps.length / 20)), // Shorten the timestamps
         datasets: [
           {
             label: "Alerts Over Time",
@@ -176,14 +176,14 @@ const Dashboard = () => {
     return colors;
   };
 
-  const handleSignatureCategoryClick = () => {
-    // Handle click event to open a list showing details about various signature and categories
-    // This could include a modal or a side drawer component to display the details
-    // alert("Signature and Category details clicked!");
-  };
+  // const handleSignatureCategoryClick = () => {
+  //   // Handle click event to open a list showing details about various signature and categories
+  //   // This could include a modal or a side drawer component to display the details
+  //   // alert("Signature and Category details clicked!");
+  // };
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={15}>
       {/* Flow ID Over Time Chart */}
       <Grid item xs={12} md={6}>
         <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
@@ -285,26 +285,11 @@ const Dashboard = () => {
       </Grid>
 
       {/* Signature & Category Distribution Pie Chart */}
-      <Grid
-        item
-        xs={12}
-        md={6}
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100%",
-        }} // Center vertically as well
-      >
+      <Grid item xs={12} md={6}>
         <Card
           className="card"
           sx={{
             backgroundColor: "#ffffff",
-            height: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
           }} // Center vertically as well
         >
           <CardContent>
@@ -328,13 +313,6 @@ const Dashboard = () => {
                   }}
                   height={chartHeight}
                 />
-                {/* <Typography
-                  variant="body2"
-                  sx={{ color: "#000000", marginTop: 2 }}
-                  onClick={handleSignatureCategoryClick}
-                >
-                  Signature and Categories details
-                </Typography> */}
               </>
             ) : (
               <Typography>Loading...</Typography>
