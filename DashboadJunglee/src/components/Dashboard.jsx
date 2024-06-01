@@ -37,6 +37,10 @@ const Dashboard = () => {
     alertPie: { labels: [], datasets: [] },
   });
 
+  // Define uniqueSignatures and uniqueCategories in the outer scope
+  const [uniqueSignatures, setUniqueSignatures] = useState([]);
+  const [uniqueCategories, setUniqueCategories] = useState([]);
+
   useEffect(() => {
     // Process the JSON data to create chart data
     const timestamps = data.map((item) => item.timestamp);
@@ -70,32 +74,9 @@ const Dashboard = () => {
     const signatureColors = generateRandomColors(uniqueSignatures.length);
     const categoryColors = generateRandomColors(uniqueCategories.length);
 
-    // Create datasets for signature and category pie charts
-    const signatureData = uniqueSignatures.map((signature, index) => {
-      const count = signatureCategories.filter(
-        (sc) => sc.signature === signature
-      ).length;
-      return {
-        label: signature,
-        data: [count],
-        backgroundColor: signatureColors[index],
-      };
-    });
-
-    const categoryData = uniqueCategories.map((category, index) => {
-      const count = signatureCategories.filter(
-        (sc) => sc.category === category
-      ).length;
-      return {
-        label: category,
-        data: [count],
-        backgroundColor: categoryColors[index],
-      };
-    });
-
     setChartData({
       line: {
-        labels: timestamps,
+        labels: timestamps.slice(0, Math.ceil(timestamps.length / 2)), // Shorten the timestamps
         datasets: [
           {
             label: "Flow ID Over Time",
@@ -106,7 +87,7 @@ const Dashboard = () => {
         ],
       },
       bar: {
-        labels: timestamps,
+        labels: timestamps.slice(0, Math.ceil(timestamps.length / 2)), // Shorten the timestamps
         datasets: [
           {
             label: "Source Port Distribution",
@@ -130,7 +111,7 @@ const Dashboard = () => {
         ],
       },
       alertBar: {
-        labels: timestamps,
+        labels: timestamps.slice(0, Math.ceil(timestamps.length / 2)), // Shorten the timestamps
         datasets: [
           {
             label: "Alerts Over Time",
@@ -140,21 +121,33 @@ const Dashboard = () => {
         ],
       },
       alertPie: {
-        labels: ["Signature & Category"],
+        labels: [...uniqueSignatures, ...uniqueCategories],
         datasets: [
           {
-            label: "Signature Distribution",
-            data: signatureData.map((d) => d.data[0]),
-            backgroundColor: signatureData.map((d) => d.backgroundColor),
+            label: "Signatures",
+            data: uniqueSignatures.map(
+              (signature) =>
+                signatureCategories.filter((sc) => sc.signature === signature)
+                  .length
+            ),
+            backgroundColor: signatureColors,
           },
           {
-            label: "Category Distribution",
-            data: categoryData.map((d) => d.data[0]),
-            backgroundColor: categoryData.map((d) => d.backgroundColor),
+            label: "Categories",
+            data: uniqueCategories.map(
+              (category) =>
+                signatureCategories.filter((sc) => sc.category === category)
+                  .length
+            ),
+            backgroundColor: categoryColors,
           },
         ],
       },
     });
+
+    // Set the state of uniqueSignatures and uniqueCategories
+    setUniqueSignatures(uniqueSignatures);
+    setUniqueCategories(uniqueCategories);
   }, []);
 
   const chartHeight = 300; // Adjust the height as needed
@@ -167,7 +160,7 @@ const Dashboard = () => {
     },
     title: {
       display: true,
-      text: "Values", // Y-axis title
+      text: "Volume ", // Y-axis title
     },
   };
 
@@ -183,187 +176,171 @@ const Dashboard = () => {
     return colors;
   };
 
-  const legendOptions = {
-    display: true,
-    position: "bottom",
-    labels: {
-      generateLabels: function (chart) {
-        const labels = [];
-        const datasets = chart.data.datasets;
-        datasets.forEach((dataset) => {
-          dataset.data.forEach((dataItem, index) => {
-            labels.push({
-              text: `${dataset.label}: ${dataItem}`,
-              fillStyle: dataset.backgroundColor[index],
-            });
-          });
-        });
-        return labels;
-      },
-    },
+  const handleSignatureCategoryClick = () => {
+    // Handle click event to open a list showing details about various signature and categories
+    // This could include a modal or a side drawer component to display the details
+    // alert("Signature and Category details clicked!");
   };
 
   return (
     <Grid container spacing={3}>
       {/* Flow ID Over Time Chart */}
       <Grid item xs={12} md={6}>
-        <Grid container justifyContent="center">
-          <Grid item>
-            <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: "#000000" }}>
-                  Flow ID Over Time
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#000000" }}>
-                  Displays the flow ID over time
-                </Typography>
-                {chartData.line.labels.length > 0 ? (
-                  <Line
-                    data={chartData.line}
-                    options={{
-                      scales: {
-                        y: yAxisOptions,
-                      },
-                    }}
-                    height={chartHeight}
-                  />
-                ) : (
-                  <Typography>Loading...</Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ color: "#000000" }}>
+              Flow ID Over Time
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#000000" }}>
+              Displays the flow ID over time
+            </Typography>
+            {chartData.line.labels.length > 0 ? (
+              <Line
+                data={chartData.line}
+                options={{
+                  scales: {
+                    y: yAxisOptions,
+                  },
+                }}
+                height={chartHeight}
+              />
+            ) : (
+              <Typography>Loading...</Typography>
+            )}
+          </CardContent>
+        </Card>
       </Grid>
 
       {/* Source Port Distribution Chart */}
       <Grid item xs={12} md={6}>
-        <Grid container justifyContent="center">
-          <Grid item>
-            <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-              <CardContent>
-                <Typography
-                  variant="
-
-body2"
-                  sx={{ color: "#000000" }}
-                >
-                  Source Port Distribution
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#000000" }}>
-                  Displays the source port distribution
-                </Typography>
-                {chartData.bar.labels.length > 0 ? (
-                  <Bar
-                    data={chartData.bar}
-                    options={{
-                      scales: {
-                        y: yAxisOptions,
-                      },
-                    }}
-                    height={chartHeight}
-                  />
-                ) : (
-                  <Typography>Loading...</Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ color: "#000000" }}>
+              Source Port Distribution
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#000000" }}>
+              Displays the source port distribution
+            </Typography>
+            {chartData.bar.labels.length > 0 ? (
+              <Bar
+                data={chartData.bar}
+                options={{
+                  scales: {
+                    y: yAxisOptions,
+                  },
+                }}
+                height={chartHeight}
+              />
+            ) : (
+              <Typography>Loading...</Typography>
+            )}
+          </CardContent>
+        </Card>
       </Grid>
 
       {/* Severity Distribution Pie Chart */}
       <Grid item xs={12} md={6}>
-        <Grid container justifyContent="center">
-          <Grid item>
-            <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: "#000000" }}>
-                  Severity Distribution
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#000000" }}>
-                  Displays severity distribution
-                </Typography>
-                {chartData.pie.labels.length > 0 ? (
-                  <Pie data={chartData.pie} height={chartHeight} />
-                ) : (
-                  <Typography>Loading...</Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ color: "#000000" }}>
+              Severity Distribution
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#000000" }}>
+              Displays severity distribution
+            </Typography>
+            {chartData.pie.labels.length > 0 ? (
+              <Pie data={chartData.pie} height={chartHeight} />
+            ) : (
+              <Typography>Loading...</Typography>
+            )}
+          </CardContent>
+        </Card>
       </Grid>
 
       {/* Alerts Over Time Bar Chart */}
       <Grid item xs={12} md={6}>
-        <Grid container justifyContent="center">
-          <Grid item>
-            <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: "#000000" }}>
-                  Alerts Over Time
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#000000" }}>
-                  Displays the number of alerts over time
-                </Typography>
-                {chartData.alertBar.labels.length > 0 ? (
-                  <Bar
-                    data={chartData.alertBar}
-                    options={{
-                      scales: {
-                        y: yAxisOptions,
-                      },
-                    }}
-                    height={chartHeight}
-                  />
-                ) : (
-                  <Typography>Loading...</Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ color: "#000000" }}>
+              Alerts Over Time
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#000000" }}>
+              Displays the number of alerts over time
+            </Typography>
+            {chartData.alertBar.labels.length > 0 ? (
+              <Bar
+                data={chartData.alertBar}
+                options={{
+                  scales: {
+                    y: yAxisOptions,
+                  },
+                }}
+                height={chartHeight}
+              />
+            ) : (
+              <Typography>Loading...</Typography>
+            )}
+          </CardContent>
+        </Card>
       </Grid>
 
       {/* Signature & Category Distribution Pie Chart */}
-      <Grid item xs={12} md={12}>
-        <Grid container justifyContent="center">
-          <Grid item>
-            <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ color: "#000000" }}>
-                  Signature & Category Distribution
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#000000" }}>
-                  Displays the total number of alerts by signature and category
-                </Typography>
-                {chartData.alertPie.labels.length > 0 ? (
-                  <Pie
-                    data={chartData.alertPie}
-                    height={chartHeight}
-                    options={{
-                      tooltips: {
-                        callbacks: {
-                          label: function (tooltipItem, data) {
-                            const dataset =
-                              data.datasets[tooltipItem.datasetIndex];
-                            const label = dataset.labels[tooltipItem.index];
-                            const value = dataset.data[tooltipItem.index];
-                            return `${label}: ${value}`;
-                          },
-                        },
+      <Grid
+        item
+        xs={12}
+        md={6}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+        }} // Center vertically as well
+      >
+        <Card
+          className="card"
+          sx={{
+            backgroundColor: "#ffffff",
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }} // Center vertically as well
+        >
+          <CardContent>
+            <Typography variant="h6" sx={{ color: "#000000" }}>
+              Signature & Category Distribution
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#000000" }}>
+              Displays the distribution of signatures and categories
+            </Typography>
+            {chartData.alertPie.labels.length > 0 ? (
+              <>
+                <Pie
+                  data={chartData.alertPie}
+                  options={{
+                    plugins: {
+                      legend: {
+                        display: true,
+                        position: "bottom",
                       },
-                      legend: legendOptions,
-                    }}
-                  />
-                ) : (
-                  <Typography>Loading...</Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+                    },
+                  }}
+                  height={chartHeight}
+                />
+                {/* <Typography
+                  variant="body2"
+                  sx={{ color: "#000000", marginTop: 2 }}
+                  onClick={handleSignatureCategoryClick}
+                >
+                  Signature and Categories details
+                </Typography> */}
+              </>
+            ) : (
+              <Typography>Loading...</Typography>
+            )}
+          </CardContent>
+        </Card>
       </Grid>
     </Grid>
   );
