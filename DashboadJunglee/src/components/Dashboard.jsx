@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Line, Bar, Pie } from "react-chartjs-2";
-import { Card, CardContent, Typography, Grid } from "@mui/material";
+import { Card, CardContent, Typography, Grid, Button } from "@mui/material";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,9 +35,11 @@ const Dashboard = () => {
     pie: { labels: [], datasets: [] },
     alertBar: { labels: [], datasets: [] },
     alertPie: { labels: [], datasets: [] },
+    protoBar: { labels: [], datasets: [] },
   });
 
-  // Define uniqueSignatures and uniqueCategories in the outer scope
+  const [showTimestamps, setShowTimestamps] = useState(true);
+
   const [uniqueSignatures, setUniqueSignatures] = useState([]);
   const [uniqueCategories, setUniqueCategories] = useState([]);
 
@@ -70,13 +72,22 @@ const Dashboard = () => {
       new Set(signatureCategories.map((sc) => sc.category))
     );
 
+    // Get proto data
+    const protoData = data.map((item) => item.proto);
+    const protoCounts = protoData.reduce((acc, proto) => {
+      acc[proto] = (acc[proto] || 0) + 1;
+      return acc;
+    }, {});
+
     // Assign colors to unique signatures and categories
     const signatureColors = generateRandomColors(uniqueSignatures.length);
     const categoryColors = generateRandomColors(uniqueCategories.length);
 
     setChartData({
       line: {
-        labels: timestamps.slice(0, Math.ceil(timestamps.length / 20)), // Shorten the timestamps
+        labels: showTimestamps
+          ? timestamps.slice(0, Math.ceil(timestamps.length / 20))
+          : [],
         datasets: [
           {
             label: "Flow ID Over Time",
@@ -87,7 +98,9 @@ const Dashboard = () => {
         ],
       },
       bar: {
-        labels: timestamps.slice(0, Math.ceil(timestamps.length / 20)), // Shorten the timestamps
+        labels: showTimestamps
+          ? timestamps.slice(0, Math.ceil(timestamps.length / 20))
+          : [],
         datasets: [
           {
             label: "Source Port Distribution",
@@ -111,7 +124,9 @@ const Dashboard = () => {
         ],
       },
       alertBar: {
-        labels: timestamps.slice(0, Math.ceil(timestamps.length / 20)), // Shorten the timestamps
+        labels: showTimestamps
+          ? timestamps.slice(0, Math.ceil(timestamps.length / 20))
+          : [],
         datasets: [
           {
             label: "Alerts Over Time",
@@ -143,24 +158,35 @@ const Dashboard = () => {
           },
         ],
       },
+      protoBar: {
+        labels: Object.keys(protoCounts),
+        datasets: [
+          {
+            label: "Protocol Distribution",
+            data: Object.values(protoCounts),
+            backgroundColor: generateRandomColors(
+              Object.keys(protoCounts).length
+            ),
+          },
+        ],
+      },
     });
 
-    // Set the state of uniqueSignatures and uniqueCategories
     setUniqueSignatures(uniqueSignatures);
     setUniqueCategories(uniqueCategories);
-  }, []);
+  }, [showTimestamps]);
 
-  const chartHeight = 300; // Adjust the height as needed
+  const chartHeight = 300;
 
   const yAxisOptions = {
     ticks: {
       callback: function (value) {
-        return value.toLocaleString(); // Format the y-axis values
+        return value.toLocaleString();
       },
     },
     title: {
       display: true,
-      text: "Volume ", // Y-axis title
+      text: "Volume ",
     },
   };
 
@@ -176,14 +202,13 @@ const Dashboard = () => {
     return colors;
   };
 
-  // const handleSignatureCategoryClick = () => {
-  //   // Handle click event to open a list showing details about various signature and categories
-  //   // This could include a modal or a side drawer component to display the details
-  //   // alert("Signature and Category details clicked!");
-  // };
+  const handleReloadData = () => {
+    // This function can be expanded to fetch new data or apply other transformations
+    setShowTimestamps((prev) => !prev); // Toggle timestamps for demonstration
+  };
 
   return (
-    <Grid container spacing={15}>
+    <Grid container spacing={15} sx={{ paddingTop: "60px" }}>
       {/* Flow ID Over Time Chart */}
       <Grid item xs={12} md={6}>
         <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
@@ -194,6 +219,14 @@ const Dashboard = () => {
             <Typography variant="body2" sx={{ color: "#000000" }}>
               Displays the flow ID over time
             </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleReloadData}
+              sx={{ marginBottom: "10px" }}
+            >
+              Reload Data
+            </Button>
             {chartData.line.labels.length > 0 ? (
               <Line
                 data={chartData.line}
@@ -221,6 +254,14 @@ const Dashboard = () => {
             <Typography variant="body2" sx={{ color: "#000000" }}>
               Displays the source port distribution
             </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleReloadData}
+              sx={{ marginBottom: "10px" }}
+            >
+              Reload Data
+            </Button>
             {chartData.bar.labels.length > 0 ? (
               <Bar
                 data={chartData.bar}
@@ -248,6 +289,14 @@ const Dashboard = () => {
             <Typography variant="body2" sx={{ color: "#000000" }}>
               Displays severity distribution
             </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleReloadData}
+              sx={{ marginBottom: "10px" }}
+            >
+              Reload Data
+            </Button>
             {chartData.pie.labels.length > 0 ? (
               <Pie data={chartData.pie} height={chartHeight} />
             ) : (
@@ -267,6 +316,14 @@ const Dashboard = () => {
             <Typography variant="body2" sx={{ color: "#000000" }}>
               Displays the number of alerts over time
             </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleReloadData}
+              sx={{ marginBottom: "10px" }}
+            >
+              Reload Data
+            </Button>
             {chartData.alertBar.labels.length > 0 ? (
               <Bar
                 data={chartData.alertBar}
@@ -286,12 +343,7 @@ const Dashboard = () => {
 
       {/* Signature & Category Distribution Pie Chart */}
       <Grid item xs={12} md={6}>
-        <Card
-          className="card"
-          sx={{
-            backgroundColor: "#ffffff",
-          }} // Center vertically as well
-        >
+        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
           <CardContent>
             <Typography variant="h6" sx={{ color: "#000000" }}>
               Signature & Category Distribution
@@ -299,6 +351,14 @@ const Dashboard = () => {
             <Typography variant="body2" sx={{ color: "#000000" }}>
               Displays the distribution of signatures and categories
             </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleReloadData}
+              sx={{ marginBottom: "10px" }}
+            >
+              Reload Data
+            </Button>
             {chartData.alertPie.labels.length > 0 ? (
               <>
                 <Pie
@@ -314,6 +374,41 @@ const Dashboard = () => {
                   height={chartHeight}
                 />
               </>
+            ) : (
+              <Typography>Loading...</Typography>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
+
+      {/* Protocol Distribution Bar Chart */}
+      <Grid item xs={12} md={6}>
+        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ color: "#000000" }}>
+              Protocol Distribution
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#000000" }}>
+              Displays the distribution of protocols
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleReloadData}
+              sx={{ marginBottom: "10px" }}
+            >
+              Reload Data
+            </Button>
+            {chartData.protoBar.labels.length > 0 ? (
+              <Bar
+                data={chartData.protoBar}
+                options={{
+                  scales: {
+                    y: yAxisOptions,
+                  },
+                }}
+                height={chartHeight}
+              />
             ) : (
               <Typography>Loading...</Typography>
             )}
