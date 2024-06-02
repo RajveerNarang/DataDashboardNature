@@ -39,7 +39,7 @@ const App = () => {
               textAlign: "center",
             }}
           >
-            WiJunglee Dashboard
+            WiJungle Dashboard
           </Typography>
           <Box className="theme-toggle">
             <Switch checked={darkMode} onChange={handleThemeChange} />
