@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Line, Bar, Pie } from "react-chartjs-2";
-import { Card, CardContent, Typography, Grid, Button } from "@mui/material";
+import { Grid } from "@mui/material";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,6 +14,8 @@ import {
   Legend,
 } from "chart.js";
 import data from "../../eve.json"; // Import the JSON data
+import ChartCard from "./ChartCard"; // Import the ChartCard component
+import PieChart from "./PieChart"; // Import the PieChart componentChartCard component
 
 // Register the necessary components with Chart.js
 ChartJS.register(
@@ -176,20 +178,6 @@ const Dashboard = () => {
     setUniqueCategories(uniqueCategories);
   }, [showTimestamps]);
 
-  const chartHeight = 300;
-
-  const yAxisOptions = {
-    ticks: {
-      callback: function (value) {
-        return value.toLocaleString();
-      },
-    },
-    title: {
-      display: true,
-      text: "Volume ",
-    },
-  };
-
   const generateRandomColors = (count) => {
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -203,218 +191,53 @@ const Dashboard = () => {
   };
 
   const handleReloadData = () => {
-    // This function can be expanded to fetch new data or apply other transformations
     setShowTimestamps((prev) => !prev); // Toggle timestamps for demonstration
   };
 
   return (
-    <Grid container spacing={15} sx={{ paddingTop: "60px" }}>
-      {/* Flow ID Over Time Chart */}
-      <Grid item xs={12} md={6}>
-        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ color: "#000000" }}>
-              Flow ID Over Time
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#000000" }}>
-              Displays the flow ID over time
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleReloadData}
-              sx={{ marginBottom: "10px" }}
-            >
-              Reload Data
-            </Button>
-            {chartData.line.labels.length > 0 ? (
-              <Line
-                data={chartData.line}
-                options={{
-                  scales: {
-                    y: yAxisOptions,
-                  },
-                }}
-                height={chartHeight}
-              />
-            ) : (
-              <Typography>Loading...</Typography>
-            )}
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Source Port Distribution Chart */}
-      <Grid item xs={12} md={6}>
-        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ color: "#000000" }}>
-              Source Port Distribution
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#000000" }}>
-              Displays the source port distribution
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleReloadData}
-              sx={{ marginBottom: "10px" }}
-            >
-              Reload Data
-            </Button>
-            {chartData.bar.labels.length > 0 ? (
-              <Bar
-                data={chartData.bar}
-                options={{
-                  scales: {
-                    y: yAxisOptions,
-                  },
-                }}
-                height={chartHeight}
-              />
-            ) : (
-              <Typography>Loading...</Typography>
-            )}
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Severity Distribution Pie Chart */}
-      <Grid item xs={12} md={6}>
-        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ color: "#000000" }}>
-              Severity Distribution
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#000000" }}>
-              Displays severity distribution
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleReloadData}
-              sx={{ marginBottom: "10px" }}
-            >
-              Reload Data
-            </Button>
-            {chartData.pie.labels.length > 0 ? (
-              <Pie data={chartData.pie} height={chartHeight} />
-            ) : (
-              <Typography>Loading...</Typography>
-            )}
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Alerts Over Time Bar Chart */}
-      <Grid item xs={12} md={6}>
-        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ color: "#000000" }}>
-              Alerts Over Time
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#000000" }}>
-              Displays the number of alerts over time
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleReloadData}
-              sx={{ marginBottom: "10px" }}
-            >
-              Reload Data
-            </Button>
-            {chartData.alertBar.labels.length > 0 ? (
-              <Bar
-                data={chartData.alertBar}
-                options={{
-                  scales: {
-                    y: yAxisOptions,
-                  },
-                }}
-                height={chartHeight}
-              />
-            ) : (
-              <Typography>Loading...</Typography>
-            )}
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Signature & Category Distribution Pie Chart */}
-      <Grid item xs={12} md={6}>
-        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ color: "#000000" }}>
-              Signature & Category Distribution
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#000000" }}>
-              Displays the distribution of signatures and categories
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleReloadData}
-              sx={{ marginBottom: "10px" }}
-            >
-              Reload Data
-            </Button>
-            {chartData.alertPie.labels.length > 0 ? (
-              <>
-                <Pie
-                  data={chartData.alertPie}
-                  options={{
-                    plugins: {
-                      legend: {
-                        display: true,
-                        position: "bottom",
-                      },
-                    },
-                  }}
-                  height={chartHeight}
-                />
-              </>
-            ) : (
-              <Typography>Loading...</Typography>
-            )}
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Protocol Distribution Bar Chart */}
-      <Grid item xs={12} md={6}>
-        <Card className="card" sx={{ backgroundColor: "#ffffff" }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ color: "#000000" }}>
-              Protocol Distribution
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#000000" }}>
-              Displays the distribution of protocols
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleReloadData}
-              sx={{ marginBottom: "10px" }}
-            >
-              Reload Data
-            </Button>
-            {chartData.protoBar.labels.length > 0 ? (
-              <Bar
-                data={chartData.protoBar}
-                options={{
-                  scales: {
-                    y: yAxisOptions,
-                  },
-                }}
-                height={chartHeight}
-              />
-            ) : (
-              <Typography>Loading...</Typography>
-            )}
-          </CardContent>
-        </Card>
-      </Grid>
+    <Grid container spacing={4} sx={{ paddingTop: "60px" }}>
+      <ChartCard
+        title="Flow ID Over Time"
+        description="Displays the flow ID over time"
+        chartType={Line}
+        data={chartData.line}
+        onReloadData={handleReloadData}
+      />
+      <ChartCard
+        title="Source Port Distribution"
+        description="Displays the source port distribution"
+        chartType={Bar}
+        data={chartData.bar}
+        onReloadData={handleReloadData}
+      />
+      <PieChart
+        title="Severity Distribution"
+        description="Displays severity distribution"
+        chartType={Pie}
+        data={chartData.pie}
+        onReloadData={handleReloadData}
+      />
+      <ChartCard
+        title="Alerts Over Time"
+        description="Displays the number of alerts over time"
+        chartType={Bar}
+        data={chartData.alertBar}
+        onReloadData={handleReloadData}
+      />
+      <PieChart
+        title="Signature & Category Distribution"
+        description="Displays the distribution of signatures and categories"
+        chartType={Pie}
+        data={chartData.alertPie}
+        onReloadData={handleReloadData}
+      />
+      <ChartCard
+        title="Protocol Distribution"
+        description="Displays the distribution of protocols"
+        chartType={Bar}
+        data={chartData.protoBar}
+        onReloadData={handleReloadData}
+      />
     </Grid>
   );
 };
